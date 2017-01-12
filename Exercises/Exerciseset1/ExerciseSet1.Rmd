@@ -1,3 +1,4 @@
+runtime: shiny
 
 ---
 title: "Exercise Set 1"
@@ -89,9 +90,31 @@ pnl_plot(SPY)
 **Your Answers here:**
 <br>
 <br>
+
+1. In the *dataSet1.R* file the variable *mytickers* is initialized with the data to retrieve, here the S&P500 and Apple :  *mytickers = c("SPY", "AAPL")*.
+<br>
+Then the *for* loop downloads the data related to *SPY* and *AAPL*, in the line:
+<br>
+*tmpdata<-as.matrix(try(getSymbols(Symbols=ticker_to_get,from = startDate,auto.assign=FALSE)))*. 
 <br>
 <br>
 
+2. Here are the statistics for the Apple stock:
+
+* The cumulative returns of the Apple stock during this period is **`r round(100*sum(StockReturns[,2]),1)`%**.
+* The average daily returns of the Apple stock during this period is **`r round(100*mean(StockReturns[,2]),3)`%**;
+* The standard deviation of the daily returns of the Apple stock during this period is **`r round(100*sd(StockReturns[,2]),3)`%**;
+<br>
+<br>
+
+3. To add *Yahoo* data, we need to modify the script *dataSet1.R* a bit, namely adding "YHOO" to the indices to retrieve. This is performed by modifying the variable *mytickers*, currently initialized as *c("SPY", "AAPL")* by adding Yahoo! to the list. The code should show *mytickers = c("SPY", "AAPL", "YHOO")*.
+<br>
+<br>
+Then we can compute the statistics in the same way as before:
+
+* The cumulative returns of the Yahoo! stock during this period is **`r round(100*sum(StockReturns[,3]),1)`%**.
+* The average daily returns of the Yahoo! stock during this period is **`r round(100*mean(StockReturns[,3]),3)`%**;
+* The standard deviation of the daily returns of the Yahoo! stock during this period is **`r round(100*sd(StockReturns[,3]),3)`%**;
 <hr>
 <hr>
 
@@ -127,12 +150,24 @@ We can also transpose the matrix of returns to create a new "horizontal" matrix.
 1. What R commands can you use to get the number of rows and number of columns of the new matrix called transposedData?
 2. Based on the help for the R function *apply* (`help(apply)`), can you create again the portfolio of S&P and Apple and plot the returns in a new figure below?
 
-**Your Answers here:**
+**Your Answers here:** <br>
+**Preliminary comment** <br>
+Following the Extra Question in Part I, the variable *StockReturns* also contains data for Yahoo, and following the Extra Question in Part III it also contains data for Microsoft. This is therefore reflected in the number of rows contained in *transposedData*. <br> 
+
+1. Number of rows: *nrow(transposedData)*
 <br>
-<br>
+Number of columns:*ncol(transposedData)*
 <br>
 <br>
 
+2. Here we just have to apply the function *mean* on columns instead of rows (as well as adjust for the names). To account for the additional Yahoo and Microsoft data, I twitched the code a little bit.
+<br>
+```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
+transposedData = t(StockReturns[,c("SPY","AAPL")])
+portfolio = apply(transposedData,2,mean)
+names(portfolio) <- colnames(transposedData)
+pnl_plot(portfolio)
+```
 <hr>
 <hr>
 
@@ -148,6 +183,20 @@ This is an important step and will get you to think about the overall process on
 **Your Answers here:**
 <br>
 <br>
+
+1. The start Date is initilized by the command "startDate = "2001-01-01"". It's already set to 2001-01-01.
+<br>
+<br>
+
+2. I chose to do a portfolio with equal weight on Microsoft (MSFT) and Apple (AAPL). Therefore, I added "MSFT" to the variable *mytickers*
+<br>
+
+```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE,results='asis',fig.align='center', fig=TRUE}
+DataToPlot <- matrix(c(StockReturns[,"AAPL"],StockReturns[,"MSFT"]), nrow = length(StockReturns[,"AAPL"]), ncol=2, byrow=FALSE)
+portfolio = apply(DataToPlot,1,mean)
+names(portfolio) <- rownames(StockReturns)
+pnl_plot(portfolio)
+```
 <br>
 <br>
 
@@ -182,9 +231,12 @@ myData + StockReturns[1:40,]
 **Your Answers here:**
 <br>
 <br>
+1. The command `sum(myData != StockReturns[1:20,])` sums the results of the logical equation determining if the variable my Data is the same (component per component) as what has been stored and then read in the CSV file. If the write/read had been correctly done, the command should return 0, saying that the two variables are identical. 
+<br>
+However, the *read* function used the separator ";" instead of ",". Therefore, the equation returns `nrows(myData)*ncol(myData)`, thus saying that the two variables are totally different. Indeed, the csv file was incorrectly read and, not finding the separator ";", concatenated all the data amond each line.
 <br>
 <br>
-
+2. The command `myData + StockReturns[1:40,]` is supposed to return a matrix corresponding to the sum of both matrices. However, the data present in *myData* in not numeric (it's a string of characters corresponding to the concatenation of all the data on each line). Therefore RStudio returns an error. 
 <hr>
 <hr>
 
@@ -198,7 +250,7 @@ Can you now load another dataset from some CSV file and report some basic statis
 
 Finally, just for fun, one can add some interactivity in the report using [Shiny](http://rmarkdown.rstudio.com/authoring_shiny.html).All one needs to do is set the eval flag of the code chunk below (see the .Rmd file) to "TRUE", add the line "runtime: shiny" at the very begining of the .Rmd file, make the markdown output to be "html_document", and then press "Run Document". 
 
-```{r, eval=FALSE, echo = TRUE}
+```{r, eval=TRUE, echo = TRUE}
 sliderInput("startdate", "Starting Date:", min = 1, max = length(portfolio), 
             value = 1)
 sliderInput("enddate", "End Date:", min = 1, max = length(portfolio), 
