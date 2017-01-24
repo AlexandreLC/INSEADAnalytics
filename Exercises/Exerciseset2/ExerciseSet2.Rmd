@@ -95,6 +95,11 @@ print(m1,'chart')
 
 We see quite high correlations among some of the futures. Does it make sense? Why? Do you see some negative correlations? Do those make sense? 
 
+**My Answers**
+
+For example, cereals are higly correlated with one another (Corn and wheat are correlated with 0.63 correlation coefficient). It does make sense as they look alike (meaning supply and demand are similar and move similarly).
+
+
 Given such high correlations, we can try to see whether there are some "principal components" (see [reading on dimensionality reduction](http://inseaddataanalytics.github.io/INSEADAnalytics/CourseSessions/Sessions23/FactorAnalysisReading.html)). This analysis can also indicate whether all futures (the global economy!) are driven by some common "factors" (let's call them **"risk factors"**). 
 
 <br>
@@ -165,9 +170,92 @@ print(m1,'chart')
 <br>
 
 **Your Answers here:**
+
+1. Using the table showing the cumulative explained variance, we see that we need only 6 principal components to explain the more than 50% of the data (52.29%).
+2. "5 yr T-notes US and "10 yr T-notes US" with a weight of 0.93.
+3. Factors 1 to 5 are either monetary or stock clusters (by region that usually go together). Factor 6 is Oil. Factor 7 is raw metal. Component 8 is cereals. Component 9 is precious metals (gold, silver, etc...). Component 10 is Asian stock market.
+4. This is the pre-crisis rotated principal components:
+
+<br>
+```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE, results='asis'}
+pre_crisis_data = futures_data[as.Date(rownames(futures_data)) < "2007-10-01" , ]
+Variance_Explained_Table_results_pcd<-PCA(pre_crisis_data, graph=FALSE)
+Variance_Explained_Table_pcd<-cbind(paste("component",1:ncol(pre_crisis_data),sep=" "),Variance_Explained_Table_results_pcd$eig)
+Variance_Explained_Table_pcd<-as.data.frame(Variance_Explained_Table_pcd)
+colnames(Variance_Explained_Table_pcd)<-c("Component","Eigenvalue", "Percentage_of_explained_variance", "Cumulative_percentage_of_explained_variance")
+show_data_pcd = data.frame(Variance_Explained_Table_pcd)
+m1<-gvisTable(show_data_pcd,options=list(width=1920, height=min(400,27*(nrow(show_data_pcd)+1)),allowHTML=TRUE,page='disable'),formats=list(Eigenvalue="#.##",Percentage_of_explained_variance="#.##",Cumulative_percentage_of_explained_variance="#.##"))
+print(m1,'chart')
+```
+<br>
+```{r Fig1_pcd, echo=FALSE, comment=NA, results='asis', message=FALSE, fig.align='center', fig=TRUE}
+eigenvalues_pcd  <- Variance_Explained_Table_pcd[,2]
+df_pcd           <- cbind(as.data.frame(eigenvalues_pcd), c(1:length(eigenvalues_pcd)), rep(1, length(eigenvalues_pcd)))
+colnames(df_pcd) <- c("eigenvalues", "components", "abline")
+Line_pcd         <- gvisLineChart(as.data.frame(df_pcd), xvar="components", yvar=c("eigenvalues","abline"), options=list(title='Scree plot', legend="right", width=900, height=600, hAxis="{title:'Number of Components', titleTextStyle:{color:'black'}}", vAxes="[{title:'Eigenvalues'}]",  series="[{color:'green',pointSize:3, targetAxisIndex: 0}]"))
+print(Line_pcd, 'chart')
+```
+<br>
+```{r echo=FALSE, comment=NA, warning=FALSE, error=FALSE,message=FALSE,results='asis'}
+corused_pcd = cor(pre_crisis_data[,apply(pre_crisis_data!=0,2,sum) > 10, drop=F])
+Rotated_Results_pcd<-principal(corused_pcd, nfactors=20, rotate="varimax",score=TRUE)
+Rotated_Factors_pcd<-round(Rotated_Results_pcd$loadings,2)
+Rotated_Factors_pcd<-as.data.frame(unclass(Rotated_Factors_pcd))
+colnames(Rotated_Factors_pcd)<-paste("Component",1:ncol(Rotated_Factors_pcd),sep=" ")
+sorted_rows_pcd <- sort(Rotated_Factors_pcd[,1], decreasing = TRUE, index.return = TRUE)$ix
+Rotated_Factors_pcd <- Rotated_Factors_pcd[sorted_rows_pcd,]
+Rotated_Factors_pcd[abs(Rotated_Factors_pcd) < 0.3]<-NA
+
+show_data_pcd <- Rotated_Factors_pcd 
+show_data_pcd<-cbind(rownames(show_data_pcd),show_data_pcd)
+colnames(show_data_pcd)<-c("Variables",colnames(Rotated_Factors_pcd))
+m1<-gvisTable(show_data_pcd,options=list(showRowNumber=TRUE,width=1220, height=min(400,27*(nrow(show_data_pcd)+1)),allowHTML=TRUE,page='disable'))
+print(m1,'chart')
+```
 <br>
 <br>
+**And there are the crisis rotated principal components:**
 <br>
+```{r echo=FALSE, comment=NA, warning=FALSE, message=FALSE, results='asis'}
+crisis_data = futures_data[as.Date(rownames(futures_data)) > "2007-10-01" & as.Date(rownames(futures_data)) < "2009-03-01", ]
+Variance_Explained_Table_results_cd<-PCA(crisis_data, graph=FALSE)
+Variance_Explained_Table_cd<-cbind(paste("component",1:ncol(crisis_data),sep=" "),Variance_Explained_Table_results_cd$eig)
+Variance_Explained_Table_cd<-as.data.frame(Variance_Explained_Table_cd)
+colnames(Variance_Explained_Table_cd)<-c("Component","Eigenvalue", "Percentage_of_explained_variance", "Cumulative_percentage_of_explained_variance")
+show_data_cd = data.frame(Variance_Explained_Table_cd)
+m1<-gvisTable(show_data_cd,options=list(width=1920, height=min(400,27*(nrow(show_data_cd)+1)),allowHTML=TRUE,page='disable'),formats=list(Eigenvalue="#.##",Percentage_of_explained_variance="#.##",Cumulative_percentage_of_explained_variance="#.##"))
+print(m1,'chart')
+```
+<br>
+```{r Fig1_cd, echo=FALSE, comment=NA, results='asis', message=FALSE, fig.align='center', fig=TRUE}
+eigenvalues_cd  <- Variance_Explained_Table_cd[,2]
+df_cd           <- cbind(as.data.frame(eigenvalues_cd), c(1:length(eigenvalues_cd)), rep(1, length(eigenvalues_cd)))
+colnames(df_cd) <- c("eigenvalues", "components", "abline")
+Line_cd         <- gvisLineChart(as.data.frame(df_cd), xvar="components", yvar=c("eigenvalues","abline"), options=list(title='Scree plot', legend="right", width=900, height=600, hAxis="{title:'Number of Components', titleTextStyle:{color:'black'}}", vAxes="[{title:'Eigenvalues'}]",  series="[{color:'green',pointSize:3, targetAxisIndex: 0}]"))
+print(Line_cd, 'chart')
+```
+<br>
+```{r echo=FALSE, comment=NA, warning=FALSE, error=FALSE,message=FALSE,results='asis'}
+corused_cd = cor(crisis_data[,apply(crisis_data!=0,2,sum) > 10, drop=F])
+Rotated_Results_cd<-principal(corused_cd, nfactors=20, rotate="varimax",score=TRUE)
+Rotated_Factors_cd<-round(Rotated_Results_cd$loadings,2)
+Rotated_Factors_cd<-as.data.frame(unclass(Rotated_Factors_cd))
+colnames(Rotated_Factors_cd)<-paste("Component",1:ncol(Rotated_Factors_cd),sep=" ")
+
+sorted_rows_cd <- sort(Rotated_Factors_cd[,1], decreasing = TRUE, index.return = TRUE)$ix
+Rotated_Factors_cd <- Rotated_Factors_cd[sorted_rows,]
+Rotated_Factors_cd[abs(Rotated_Factors_cd) < 0.3]<-NA
+
+show_data_cd <- Rotated_Factors_cd 
+show_data_cd<-cbind(rownames(show_data_cd),show_data_cd)
+colnames(show_data_cd)<-c("Variables",colnames(Rotated_Factors_cd))
+m1<-gvisTable(show_data_cd,options=list(showRowNumber=TRUE,width=1220, height=min(400,27*(nrow(show_data_cd)+1)),allowHTML=TRUE,page='disable'))
+print(m1,'chart')
+```
+<br>
+
+
+4. There are many differences, but to me the most important is that raw metals (copper, zinc, nickel, ...) are the 4th most important component before the crisis, but only 8th during the crisis. During the  crisis, stock markets and 
 <br>
 
 
