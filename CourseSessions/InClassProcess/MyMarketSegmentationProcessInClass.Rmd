@@ -402,7 +402,7 @@ profile_attributes_used = c(2:82)
 numb_clusters_used = 7 # for boats possibly use 5, for Mall_Visits use 3
 
 # Please enter the method to use for the segmentation:
-profile_with = "hclust" #  "hclust" or "kmeans"
+profile_with = "kmeans" #  "hclust" or "kmeans"
 
 # Please ENTER the distance metric eventually used for the clustering in case of hierarchical clustering 
 # (e.g. "euclidean", "maximum", "manhattan", "canberra", "binary" or "minkowski" - see help(dist)). 
@@ -532,50 +532,7 @@ cluster_ids_kmeans <- unique(cluster_memberships_kmeans)
 
 if (profile_with == "hclust"){
   cluster_memberships <- cluster_memberships_hclust
-  cluster_ids <-  cluster_ids_hclShow in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-
-Show in New WindowClear OutputExpand/Collapse Output
-ust  
+  cluster_ids <-  cluster_ids_hclust  
 }
 if (profile_with == "kmeans"){
   cluster_memberships <- cluster_memberships_kmeans
@@ -807,11 +764,11 @@ test_data = data.frame(test_data)
 
 ```
 
-```{r echo=FALSE, message=FALSE, warning=FALSE,prompt=FALSE, results='asis'}
+```{r}
 formula=paste(colnames(estimation_data)[dependent_variable],paste(Reduce(paste,sapply(head(independent_variables_nolabel,-1), function(i) paste(i,"+",sep=""))),tail(independent_variables_nolabel,1),sep=""),sep="~")
 CART_tree<-rpart(formula, data= estimation_data_nolabel,method="class", control=CART_control)
-
-rpart.plot(CART_tree)
+CART_tree
+#rpart.plot(CART_tree, box.palette="OrBu", type=3, extra=1, fallen.leaves=F, branch.lty=3)
 ```
 
 ```{r echo=FALSE, message=FALSE,warning=FALSE, prompt=FALSE, results='asis',fig.width=14,fig.height=10}
